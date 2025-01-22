@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل الدخول</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2>تسجيل الدخول</h2>
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="username">اسم المستخدم</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">كلمة المرور</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit" class="auth-button">تسجيل الدخول</button>
+                
+                <div class="auth-links">
+                    <a href="/register">تسجيل حساب جديد</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // تحميل الهيدر والفوتر
+    try {
+        const headerResponse = await fetch('/components/header.html');
+        const headerHtml = await headerResponse.text();
+        document.getElementById('header-placeholder').innerHTML = headerHtml;
+
+        const footerResponse = await fetch('/components/footer.html');
+        const footerHtml = await footerResponse.text();
+        document.getElementById('footer-placeholder').innerHTML = footerHtml;
+    } catch (error) {
+        console.error('Error loading components:', error);
+    }
+
+    // معالجة نموذج تسجيل الدخول
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userRole', data.user.role);
+
+                // التوجيه حسب نوع المستخدم
+                if (data.user.role === 'admin') {
+                    window.location.replace('/admin');
+                } else {
+                    window.location.replace('/patient');
+                }
+            } else {
+                alert(data.message || 'فشل تسجيل الدخول: بيانات الدخول غير صحيحة');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.');
+        }
+    });
+});
+    </script>
+</body>
+</html>

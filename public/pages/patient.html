@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar"> <!-- تحديد اتجاه الصفحة للغة العربية -->
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة تحكم المريض</title>
+    <link rel="stylesheet" href="../css/style.css"> <!-- تضمين ملف الأنماط -->
+    <!-- إضافة مكتبة Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+   
+    
+   
+
+    <!-- مكان الهيدر الذي سيتم تحميله ديناميكياً -->
+    <div id="header-placeholder"></div>
+
+    <!-- الحاوية الرئيسية للوحة التحكم -->
+    <div class="dashboard-container">
+        <!-- القائمة الجانبية - تحتوي على معلومات المستخدم والقائمة -->
+        <div class="dashboard-sidebar">
+            <!-- معلومات المستخدم - الصورة والاسم -->
+            <div class="user-info">
+                <!-- حاوية الصورة الشخصية مع زر التعديل -->
+                <div class="avatar-container">
+                    <img src="/api/placeholder/100/100" alt="صورة المستخدم" id="userAvatar" class="user-avatar">
+                    <!-- زر تغيير الصورة -->
+                    <div class="avatar-edit">
+                        <label for="avatarUpload" class="avatar-edit-btn">
+                            <i class="fas fa-camera"></i> <!-- أيقونة الكاميرا -->
+                        </label>
+                        <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+                <h3 id="userName">اسم المستخدم</h3>
+            </div>
+
+            <!-- قائمة التنقل الجانبية -->
+            <ul class="dashboard-menu">
+                <li class="active"><a href="#profile">الملف الشخصي</a></li>
+                <li><a href="#appointments">المواعيد</a></li>
+                <li><a href="#results">نتائج التحاليل</a></li>
+                <li><a href="#settings">الإعدادات</a></li>
+            </ul>
+                              
+            <!-- زر تسجيل الخروج في القائمة الجانبية فقط -->
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                تسجيل الخروج
+            </button>
+
+        </div>
+
+        <!-- المحتوى الرئيسي - يعرض محتوى القسم المحدد -->
+        <div class="dashboard-content">
+            <!-- قسم الملف الشخصي - معلومات المستخدم -->
+            <section id="profile" class="dashboard-section">
+                <h2>الملف الشخصي</h2>
+                <div class="profile-info">
+                    <form id="profileForm">
+                        <!-- حقول تعديل المعلومات الشخصية -->
+                        <div class="form-group">
+                            <label>الاسم الكامل</label>
+                            <input type="text" id="fullName" name="fullName">
+                        </div>
+                        <div class="form-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" id="email" name="email">
+                        </div>
+                        <div class="form-group">
+                            <label>رقم الهاتف</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        <button type="submit">حفظ التغييرات</button>
+                    </form>
+                    
+                </div>
+
+                
+            </section>
+
+            <!-- قسم المواعيد - عرض وإدارة المواعيد -->
+            <section id="appointments" class="dashboard-section hidden">
+                <h2>المواعيد</h2>
+                <div class="appointments-list">
+                    <!-- بطاقة عرض الموعد -->
+                    <div class="appointment-card">
+                        <h3>الموعد القادم</h3>
+                        <div class="appointment-info">
+                            <p>التاريخ: <span>2024/1/20</span></p>
+                            <p>الوقت: <span>10:00 صباحاً</span></p>
+                            <p>نوع التحليل: <span>تحليل دم شامل</span></p>
+                        </div>
+                        <button class="btn-primary">تعديل الموعد</button>
+                        <button class="btn-danger">إلغاء الموعد</button>
+                    </div>
+                    <button class="btn-success">حجز موعد جديد</button>
+                </div>
+            </section>
+
+            <!-- قسم نتائج التحاليل -->
+            <section id="results" class="dashboard-section hidden">
+                <h2>نتائج التحاليل</h2>
+                <div class="results-list">
+                    <!-- سيتم إضافة النتائج هنا بشكل ديناميكي -->
+                </div>
+            </section>
+
+            <!-- قسم الإعدادات - تغيير كلمة المرور -->
+            <section id="settings" class="dashboard-section hidden">
+                <h2>الإعدادات</h2>
+                <div class="settings-form">
+                    <form id="settingsForm">
+                        <div class="form-group">
+                            <label>تغيير كلمة المرور</label>
+                            <input type="password" name="currentPassword" placeholder="كلمة المرور الحالية">
+                            <input type="password" name="newPassword" placeholder="كلمة المرور الجديدة">
+                            <input type="password" name="confirmPassword" placeholder="تأكيد كلمة المرور">
+                        </div>
+                        <button type="submit">حفظ التغييرات</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- مكان الفوتر الذي سيتم تحميله ديناميكياً -->
+    <div id="footer-placeholder"></div>
+
+    <script>
+       
+
+        if (req.user.role !== 'user') {
+    return res.redirect('/login');
+}
+    </script>
+
+
+    
+    <!-- ملف JavaScript للتحكم بالوظائف -->
+    <script src="../js/script.js"></script>
+
+    
+   
+
+    
+</body>
+</html>

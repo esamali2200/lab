@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة تحكم المدير</title>
+    <link rel="stylesheet" href="../css/admin.css">
+    <!-- إضافة Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    
+    <script>
+        // التحقق من وجود التوكن عند تحميل الصفحة
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/login';
+        }
+    </script>
+    
+    <!-- أضف زر تسجيل الخروج في مكان مناسب في الصفحة -->
+    <button id="logoutBtn" class="logout-button">
+        <i class="fas fa-sign-out-alt"></i>
+        تسجيل الخروج
+    </button>
+
+    <div class="admin-dashboard">
+        <!-- القائمة الجانبية للأدمن -->
+        <div class="admin-sidebar">
+            <!-- معلومات الأدمن -->
+            <div class="admin-info">
+                <img src="/api/placeholder/100/100" alt="صورة المدير" class="admin-avatar">
+                <h3>لوحة تحكم المدير</h3>
+            </div>
+            
+            <!-- قائمة التنقل -->
+            <ul class="admin-menu">
+                <li class="active">
+                    <a href="#dashboard">
+                        <i class="fas fa-home"></i>
+                        الرئيسية
+                    </a>
+                </li>
+                <li>
+                    <a href="#users">
+                        <i class="fas fa-users"></i>
+                        إدارة المستخدمين
+                    </a>
+                </li>
+                <li>
+                    <a href="#appointments">
+                        <i class="fas fa-calendar"></i>
+                        إدارة المواعيد
+                    </a>
+                </li>
+                <li>
+                    <a href="#tests">
+                        <i class="fas fa-flask"></i>
+                        التحاليل
+                    </a>
+                </li>
+                <li>
+                    <a href="#reports">
+                        <i class="fas fa-chart-bar"></i>
+                        التقارير
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div class="admin-content">
+            <!-- شريط علوي -->
+            <div class="admin-header">
+                <div class="search-bar">
+                    <input type="text" placeholder="بحث...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="admin-controls">
+                    <span class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </span>
+                    <span class="admin-name">مدير النظام</span>
+                </div>
+            </div>
+
+            <!-- لوحة الإحصائيات السريعة -->
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-info">
+                        <h4>المستخدمين</h4>
+                        <span class="stat-number">150</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <div class="stat-info">
+                        <h4>المواعيد اليوم</h4>
+                        <span class="stat-number">24</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-flask"></i>
+                    <div class="stat-info">
+                        <h4>التحاليل</h4>
+                        <span class="stat-number">45</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- جدول المواعيد اليومية -->
+            <div class="section-card">
+                <h3>المواعيد اليوم</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>اسم المريض</th>
+                            <th>نوع التحليل</th>
+                            <th>الوقت</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>أحمد محمد</td>
+                            <td>تحليل دم شامل</td>
+                            <td>10:00 صباحاً</td>
+                            <td><span class="status pending">قيد الانتظار</span></td>
+                            <td>
+                                <button class="btn-approve">قبول</button>
+                                <button class="btn-reject">رفض</button>
+                            </td>
+                        </tr>
+                        <!-- يمكن إضافة المزيد من الصفوف -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

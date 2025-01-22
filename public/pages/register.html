@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل حساب جديد</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="username">اسم المستخدم</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">كلمة المرور</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <div class="form-group">
+            <label for="role">نوع المستخدم</label>
+            <select id="role" name="role">
+                <option value="admin">مدير</option>
+                <option value="user">مستخدم عادي</option>
+            </select>
+        </div>
+
+        <button type="submit">تسجيل</button>
+    </form>
+
+    <div id="footer-placeholder"></div>
+    <script src="../js/script.js"></script>
+</body>
+</html>
