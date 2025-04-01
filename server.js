@@ -1,161 +1,86 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const path = require('path');
-const auth = require('./middleware/auth');
-const User = require('./models/User');
-const BlacklistedToken = require('./models/BlacklistedToken');
+const cors = require('cors');
+const connectDB = require('./src/config/db');
 require('dotenv').config();
+const fs = require('fs');
+const authController = require('./src/controllers/authController');
 
-// إعداد التطبيق
+// إنشاء تطبيق Express
 const app = express();
 
-// Middleware الأساسي
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
 // الاتصال بقاعدة البيانات
-mongoose.connect(process.env.MONGODB_URI)
-    .then(async () => {
-        console.log('Connected to MongoDB Successfully');
-        try {
-            // التحقق من وجود حساب الأدمن وإنشائه إذا لم يكن موجوداً
-            const adminExists = await User.findOne({ username: 'admin' });
-            if (!adminExists) {
-                const mainAdmin = new User({
-                    username: 'admin',
-                    password: await bcrypt.hash('admin123456', 10),
-                    role: 'admin'
-                });
-                await mainAdmin.save();
-                console.log('Main admin account created');
-            }
-        } catch (error) {
-            console.error('Error in initial setup:', error);
-        }
-    })
-    .catch(err => {
-        console.error('MongoDB Connection Error:', err);
-    });
+connectDB();
 
-// تكوين المسارات
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/users', auth, require('./routes/userRoutes'));
-app.use('/api/bookings', auth, require('./routes/bookingRoutes'));
-app.use('/api/admin', auth, require('./routes/adminRoutes'));
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
 
+// مجلد التحميلات
+app.use('/uploads', express.static('uploads'));
 
-app.post('/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        const user = await User.findOne({ username });
+// إنشاء مجلد التحميلات إذا لم يكن موجوداً
+if (!fs.existsSync('uploads/tests')) {
+    fs.mkdirSync('uploads/tests', { recursive: true });
+}
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(401).json({ message: 'بيانات الدخول غير صحيحة' });
-        }
+// تكوين API Routes
+app.use('/api/auth', require('./src/routes/authRoutes'));
+app.use('/api/patient', require('./src/routes/patientRoutes'));
+app.use('/api/admin', require('./src/routes/adminRoutes'));
 
-        const token = jwt.sign(
-            { userId: user._id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
-        );
+// إضافة مسارات المصادقةد
 
-        res.json({ token, user: { role: user.role } });
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ message: 'خطأ في الخادم الداخلي' });
-    }
-});
-// مسار تسجيل الخروج
-app.post('/logout', auth, async (req, res) => {
-    try {
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        if (!token) {
-            return res.status(401).json({ message: 'يرجى تسجيل الدخول' });
-        }
-
-        // إضافة التوكن إلى القائمة السوداء
-        const blacklistedToken = new BlacklistedToken({ token });
-        await blacklistedToken.save();
-
-        // تحديث وقت آخر تسجيل خروج
-        const user = await User.findById(req.user.userId);
-        if (user) {
-            user.lastLogout = new Date();
-            await user.save();
-        }
-
-        res.json({ message: 'تم تسجيل الخروج بنجاح' });
-    } catch (error) {
-        console.error('Logout error:', error);
-        res.status(500).json({ message: 'حدث خطأ في تسجيل الخروج' });
-    }
+// المسارات الأساسية للصفحات
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pages', 'index.html'));
 });
 
-// المسارات العامة
-const publicPages = ['', 'login', 'register', 'services', 'about', 'contact', 'news', 'faq', 'testimonials', 'booking'];
-publicPages.forEach(page => {
+// مسارات الصفحات
+const pages = [
+    'about',
+    'admin',
+    'booking',
+    'contact',
+    'faq',
+    'login',
+    'news',
+    'patient',
+    'register',
+    'services',
+    'testimonials'
+];
+
+// إنشاء مسار لكل صفحة
+pages.forEach(page => {
     app.get(`/${page}`, (req, res) => {
-        const filePath = page === '' ? 'index.html' : `${page}.html`;
-        res.sendFile(path.join(__dirname, 'public', 'pages', filePath));
+        res.sendFile(path.join(__dirname, 'public', 'pages', `${page}.html`));
+    });
+
+    // إضافة مسار للطلبات التي تتضمن .html
+    app.get(`/${page}.html`, (req, res) => {
+        res.redirect(`/${page}`);
     });
 });
 
-// المسارات المحمية
-app.get('/admin', auth, (req, res) => {
-    if (req.user.role !== 'admin') {
-        return res.redirect('/login');
-    }
-    res.sendFile(path.join(__dirname, 'public', 'pages', 'admin.html'));
-});
-
-app.get('/patient', auth, (req, res) => {
-    if (req.user.role !== 'user') {
-        return res.redirect('/login');
-    }
-    res.sendFile(path.join(__dirname, 'public', 'pages', 'patient.html'));
-});
-
-// مسار التحقق من التوكن
-app.get('/api/auth/verify', auth, (req, res) => {
-    try {
-        res.json({ 
-            valid: true, 
-            user: {
-                userId: req.user.userId,
-                role: req.user.role
-            }
-        });
-    } catch (error) {
-        res.status(401).json({ 
-            valid: false,
-            message: 'Token invalid'
-        });
-    }
-});
-
-// مسار التحقق من التوكن
-app.get('/api/auth-token', auth, (req, res) => {
-    try {
-        res.json({ valid: true });
-    } catch (error) {
-        res.status(401).json({ valid: false });
-    }
-});
-
-// معالجة امتداد .html
-app.use((req, res, next) => {
-    if (req.path.includes('.html')) {
-        const newPath = req.path.replace('.html', '');
-        return res.redirect(newPath);
-    }
-    next();
+// معالجة الأخطاء العامة
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'حدث خطأ في الخادم'
+    });
 });
 
 // معالجة المسارات غير الموجودة
 app.get('*', (req, res) => {
-    res.status(404).send('الصفحة غير موجودة');
+    res.status(404).send(`
+        <div style="text-align: center; margin-top: 50px; font-family: Arial, sans-serif;">
+            <h1>الصفحة غير موجودة</h1>
+            <a href="/" style="text-decoration: none; color: blue;">العودة للصفحة الرئيسية</a>
+        </div>
+    `);
 });
 
 // تشغيل السيرفر
@@ -163,14 +88,3 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-
-// معالجة الأخطاء العامة
-app.use((err, req, res, next) => {
-    console.error('Server Error:', err);
-    res.status(500).json({ 
-        success: false,
-        message: 'حدث خطأ في الخادم'
-    });
-});
-
-module.exports = app;
